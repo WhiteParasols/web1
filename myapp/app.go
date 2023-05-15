@@ -8,10 +8,14 @@ import (
 )
 
 type User struct {
-	FirstName string
-	LastName  string
-	Email     string
-	CreatedAt time.Time
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "hello world")
 }
 
 type fooHandler struct{}
@@ -21,14 +25,14 @@ func (f *fooHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, err)
+		fmt.Fprint(w, "Bad Request: ", err)
 		return
 	}
 	user.CreatedAt = time.Now()
 
 	data, _ := json.Marshal(user) //([]byte, error), Go product to Json
 	w.Header().Add("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	fmt.Fprint(w, string(data))
 	fmt.Fprint(w, "hello foo!")
 }
@@ -47,9 +51,7 @@ func nameHandler(w http.ResponseWriter, r *http.Request) {
 
 func NewHttpHandler() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "hello world")
-	})
+	mux.HandleFunc("/", indexHandler)
 
 	mux.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Hello Bar!")
